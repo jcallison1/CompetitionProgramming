@@ -1,0 +1,12 @@
+.idea
+.vscode
+
+.DS_Store
+
+input.txt
+a.out
+a.out.dSYM
+/test
+/test.dSYM
+
+/CPRust
