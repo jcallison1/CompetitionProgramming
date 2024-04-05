@@ -1,3 +1,7 @@
+#pragma GCC optimize("Ofast")
+#pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,avx2,fma")
+#pragma GCC optimize("unroll-loops")
+
 #include <iostream>
 #include <map>
 #include <unordered_map>
@@ -23,24 +27,33 @@ using namespace std;
 struct Node {
 	int out1 = -1;
 	int out2 = -1;
-	bool is_split;
 	
 	bool visited = false;
 	int best_dist = INT_MAX;
 	int prev = -1;
-	
-	Node(bool is_split): is_split(is_split) {}
-	
+		
 	template<class F> void for_each_edge(F callback) {
 		callback(out1);
 		callback(out2);
 	}
 };
 
-struct ToDoEntry {
-	int node;
-	int prev;
-};
+void form_link(vector<Node>& graph, char from_type, int from_id, char to_type, int to_id) {
+	int from_split = from_id * 2;
+	int to_split = to_id * 2;
+	int from_merge = from_id * 2 + 1;
+	int to_merge = to_id * 2 + 1;
+	
+	int dest = to_type == 'A' ? to_split : to_merge;
+	
+	if (from_type == 'A') {
+		graph[from_merge].out1 = dest;
+	} else if (from_type == 'B') {
+		graph[from_split].out1 = dest;
+	} else if (from_type == 'C') {
+		graph[from_split].out2 = dest;
+	}
+}
 
 int main() {
 	ios::sync_with_stdio(false);
@@ -51,28 +64,7 @@ int main() {
 	cin >> nodes >> edges;
 	
 	// Even nodes are split, odd are merge
-	vector<Node> graph;
-	
-	for (int i = 0; i < nodes * 2; i++) {
-		graph.push_back(Node(i % 2 == 0));
-	}
-	
-	auto form_link = [&graph](char from_type, int from_id, char to_type, int to_id) {
-		int from_split = from_id * 2;
-		int to_split = to_id * 2;
-		int from_merge = from_id * 2 + 1;
-		int to_merge = to_id * 2 + 1;
-		
-		int dest = to_type == 'A' ? to_split : to_merge;
-		
-		if (from_type == 'A') {
-			graph[from_merge].out1 = dest;
-		} else if (from_type == 'B') {
-			graph[from_split].out1 = dest;
-		} else if (from_type == 'C') {
-			graph[from_split].out2 = dest;
-		}
-	};
+	vector<Node> graph(nodes * 2, Node());
 	
 	for (int i = 0; i < edges; i++) {
 		string s1, s2;
@@ -84,14 +76,10 @@ int main() {
 		int inter1 = stoi(s1.substr(0, s1.length() - 1)) - 1;
 		int inter2 = stoi(s2.substr(0, s2.length() - 1)) - 1;
 		
-		form_link(type1, inter1, type2, inter2);
-		form_link(type2, inter2, type1, inter1);
-		
-		// graph[inter1].make_link(type1, inter2);
-		// graph[inter2].make_link(type2, inter1);
+		form_link(graph, type1, inter1, type2, inter2);
+		form_link(graph, type2, inter2, type1, inter1);
 	}
 	
-	// string final_state(nodes, 'B');
 	queue<int> to_do;
 	
 	graph[0].best_dist = 0;
@@ -149,7 +137,8 @@ int main() {
 	while (current != -1) {
 		auto& node = graph[current];
 		
-		if (node.is_split) {
+		// Check if split node
+		if (current % 2 == 0) {
 			final_state[current / 2] = node.out1 == next ? 'B' : 'C';
 		}
 		
