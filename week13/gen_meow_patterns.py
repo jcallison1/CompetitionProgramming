@@ -1,25 +1,25 @@
 meow = list("meow")
 
-def apply_inserts(q: list[str]):
-	for i in range(len(q)):
-		k = list(q)
-		k[i] = ".?"
+def apply_inserts(pat: list[str]):
+	for i in range(len(pat)):
+		new_pat = list(pat)
+		new_pat[i] = ".?"
 		
-		yield k
+		yield new_pat
 
-def apply_removes(q: list[str]):
-	for i in range(1, len(q)):
-		k = list(q)
-		k.insert(i, ".")
+def apply_removes(pat: list[str]):
+	for i in range(1, len(pat)):
+		new_pat = list(pat)
+		new_pat.insert(i, ".")
 		
-		yield k
+		yield new_pat
 
-def apply_swaps(q: list[str]):
-	for i in range(1, len(q)):
-		k = list(q)
-		k[i - 1], k[i] = k[i], k[i - 1]
+def apply_swaps(pat: list[str]):
+	for i in range(1, len(pat)):
+		new_pat = list(pat)
+		new_pat[i - 1], new_pat[i] = new_pat[i], new_pat[i - 1]
 		
-		yield k
+		yield new_pat
 
 one_patterns = list()
 
@@ -29,10 +29,12 @@ one_patterns += apply_swaps(meow)
 
 two_patterns = list()
 
-for q in one_patterns:
-	two_patterns += apply_inserts(q)
-	two_patterns += apply_removes(q)
-	two_patterns += apply_swaps(q)
+for pat in one_patterns:
+	two_patterns += apply_inserts(pat)
+	two_patterns += apply_removes(pat)
+	two_patterns += apply_swaps(pat)
 
-for q in two_patterns:
-	print('"' + "".join(q) + '",')
+result = {"".join(pat) for pat in two_patterns if pat not in one_patterns and "meow" not in "".join(pat)}
+
+for pat in result:
+	print(f'"{pat}",')
