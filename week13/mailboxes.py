@@ -14,10 +14,12 @@ def dp(start: int, end: int, remaining_boxes: int):
 	result = 99999999999999
 	
 	for pivot in range(start, end):
-		result = min(result, max(
-			dp(start, pivot, remaining_boxes),
-			dp(pivot + 1, end, remaining_boxes - 1)
-		))
+		result = min(result, dp(pivot + 1, end, remaining_boxes - 1))
+		
+		# result = min(result, max(
+		# 	dp(start, pivot, remaining_boxes),
+		# 	dp(pivot + 1, end, remaining_boxes - 1)
+		# ))
 	
 	return result
 
