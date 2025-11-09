@@ -112,7 +112,10 @@ int main() {
 				
 				auto [col_left, col_right] = col_cache[c][r];
 				
-				if (col_left == -1) continue;
+				if (col_left == -1) {
+					best_result = max(best_result, row_right - row_left + 1);
+					continue;
+				}
 				
 				int area = (col_right - col_left + 1) * (row_right - row_left + 1);
 						

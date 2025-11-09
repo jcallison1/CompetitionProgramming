@@ -26,6 +26,7 @@ using namespace std;
 
 struct Guards {
 	uint32_t value;
+	int size;
 	
 	Guards(string s) : Guards() {
 		int i = 0;
@@ -37,12 +38,14 @@ struct Guards {
 			
 			i++;
 		}
+		
+		size = s.size();
 	}
 	
 	Guards() : value(0) {}
 	
 	int get_guard(int i) {
-		return (value << (i * 2)) & 3;
+		return (value >> (i * 2)) & 3;
 	}
 	
 	void set_guard(int i, int v) {
@@ -51,8 +54,35 @@ struct Guards {
 	}
 };
 
-int dostuff(Guards guards, map<Guards, bool> j) {
+bool dostuff(Guards guards, set<uint32_t>& dead_ends, int players) {
+	// cerr << guards.value << endl;
 	
+	if (players <= 0) return true;
+	
+	// if (dead_ends.find(guards.value) != dead_ends.end()) return false;
+		
+	bool has_path = false;
+	
+	for (int i = 1; i < guards.size; i++) {
+		int left_guard = guards.get_guard(i - 1);
+		int right_guard = guards.get_guard(i);
+		
+		if (left_guard == 0 || left_guard == 1) {
+			if (right_guard == 0 || right_guard == 2) {
+				has_path = true;
+				
+				auto new_guards = guards;
+				new_guards.set_guard(i - 1, 2);
+				new_guards.set_guard(i, 1);
+				
+				if (dostuff(new_guards, dead_ends, players - 1)) return true;
+			}
+		}
+	}
+	
+	if (!has_path) dead_ends.insert(guards.value);
+	
+	return false;
 }
 
 int main() {
@@ -60,15 +90,19 @@ int main() {
 	cin.tie(nullptr);
 	cout.tie(nullptr);
 	
-	int guards, players;
-	cin >> guards >> players;
+	int guards_, players;
+	cin >> guards_ >> players;
 	
 	string guards_line;
 	cin >> guards_line;
 	
 	Guards guards(guards_line);
 	
+	set<uint32_t> dead_ends;
 	
+	bool answer = dostuff(guards, dead_ends, players);
+	
+	cout << (answer ? 1 : 0) << endl;
 	
 	return 0;
 }
